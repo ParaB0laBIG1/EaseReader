@@ -1,53 +1,25 @@
-# import fitz  # PyMuPDF
+import xml.etree.ElementTree as ET
 
-# def extract_text_from_pdf(pdf_path):
-#     doc = fitz.open(pdf_path)
-#     text = ""
-#     for page_num in range(doc.page_count):
-#         page = doc[page_num]
-#         text += page.get_text()
-#     return text
+def get_author_name(fb2_file_path):
+    tree = ET.parse(fb2_file_path)
+    root = tree.getroot()
 
-# # Пример использования
-# pdf_file_path = "C:\\Users\\Oleksii\\Downloads\\orvell-dzhordzh-19842283.pdf"
-# pdf_text = extract_text_from_pdf(pdf_file_path)
-# print(pdf_text)
+    # Пространство имён для FB2
+    ns = {'fb2': 'http://www.gribuser.ru/xml/fictionbook/2.0'}
 
+    # Найти элемент, содержащий информацию об авторе
+    author_info = root.find('.//fb2:description/fb2:title-info/fb2:author', ns)
 
-import hashlib
-import os
-import json
+    # Получить имя автора
+    author_name = author_info.find('./fb2:first-name', ns).text
+    author_last_name = author_info.find('./fb2:last-name', ns).text
 
-def get_file_info(file_path):
-    try:
-        with open(file_path, 'rb') as file:
-            content = file.read()
-            file_hash = hashlib.sha256(content).hexdigest()
-        return {"content": content, "hash": file_hash}
-    except FileNotFoundError:
-        return None
+    # Собрать полное имя автора
+    full_author_name = f'{author_name} {author_last_name}'
 
-def save_file_info(file_path, info):
-    with open(file_path, 'wb') as file:
-        file.write(info["content"])
-    with open(file_path + ".info", 'w') as info_file:
-        json.dump({"hash": info["hash"]}, info_file)
+    return full_author_name
 
-def check_file_changes(file_path):
-    info_file_path = file_path + ".info"
-    current_info = get_file_info(file_path)
-
-    if os.path.exists(info_file_path):
-        with open(info_file_path, 'r') as info_file:
-            stored_hash = json.load(info_file).get("hash", None)
-
-        if stored_hash != current_info["hash"]:
-            print("Файл был изменен после выключения программы.")
-            # Здесь можно обработать изменения в файле.
-    else:
-        print("Информации о файле нет. Создание записи.")
-        save_file_info(file_path, current_info)
-
-if __name__ == "__main__":
-    file_path = "C:\\Users\\Oleksii\\Desktop\\test.txt"
-    check_file_changes(file_path)
+# Пример использования
+fb2_file_path = "C:\\Users\\Oleksii\\Downloads\\1984. Джордж Оруэлл.fb2"
+author_name = get_author_name(fb2_file_path)
+print(f'Имя автора: {author_name}')

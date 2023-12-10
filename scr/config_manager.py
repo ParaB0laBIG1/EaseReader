@@ -9,16 +9,24 @@ class ConfigManager():
         super().__init__()
 
         self.page = page
-
         self.config_path = "config.json"
-        
+        self.config_data = self.load_config_data()  
+
         self.data = {
             "path_to_text_file": [],
             "theme": "Dark"
         }
 
-    def file_traking(self):
-        pass
+    def load_config_data(self):
+        try:
+            with open(self.config_path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+                return data
+        except FileNotFoundError:
+            return {}
+        except json.JSONDecodeError as e:
+            print(f"Error decoding JSON: {e}")
+            return {}
 
     def check_config_file(self):
         """
@@ -39,38 +47,40 @@ class ConfigManager():
 
         print("Create json file")
     
-    def get_config_data(self):
+    def get_config_data(self, key: str):
         """
             Getting config data
         """
 
-        with open(self.config_path, "r") as f:
-            return json.load(f)
+        get_data = self.config_data.get(key, [])
+        print(get_data)
+        return get_data
 
     def checking_path_availability(self, path):
         """
             Checking for duplicate paths
         """
 
-        config_data = self.get_config_data()
-        path_to_text_file_value = config_data.get("path_to_text_file", [])
-        
-        for path_file in path_to_text_file_value:
-            if path_file == path:
-                return True
-        return False
+        path_to_text_file_value = self.get_config_data(key="path_to_text_file")
+        return path in path_to_text_file_value
 
     def save_path_in_config(self, e: FilePickerResultEvent):
         """
             Save the path to the file in a json file
         """
-        config_data = self.get_config_data()
-        check = self.checking_path_availability(path=", ".join(map(lambda f: f.path, e.files)) if e.files else "Cancelled!")
-        
-        if check == True:
-            print("the selected file is already written to Json")
-        else:
-            config_data["path_to_text_file"].append(", ".join(map(lambda f: f.path, e.files)) if e.files else "Cancelled!")
-            with open(self.config_path, "w", encoding="utf-8") as f:
-                json.dump(config_data, f, indent=4, ensure_ascii=False)
-        
+        config_data = self.get_config_data(key="path_to_text_file")
+        new_paths = [f.path for f in e.files]
+
+        for path in new_paths:
+            if self.checking_path_availability(path):
+                print(f"The selected file '{path}' is already written to Json")
+            else:
+                config_data.append(path)
+
+        # Update the config_data dictionary with the new paths
+        self.config_data["path_to_text_file"] = config_data
+
+        with open(self.config_path, "w", encoding="utf-8") as f:
+            json.dump(self.config_data, f, indent=4, ensure_ascii=False)
+
+            print("Paths added to config")
