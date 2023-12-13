@@ -1,7 +1,7 @@
 from flet import *
 from ui.AppbarUi import AppBarUI
 from ui.main_window import MainWindow
-from ui.book_ui import BookUI
+from scr.book_manager import draw_book
 
 
 def main(page: Page):
@@ -14,11 +14,10 @@ def main(page: Page):
 
     appbar = AppBarUI(page=page)
     app = MainWindow(page=page)
-    book_ui = BookUI(page=page, main_window=app)
 
     page.appbar = appbar.appbarui
     page.add(app.build())
-    book_ui.draw_book_ui()
+    draw_book(app)
 
     page.update()
 

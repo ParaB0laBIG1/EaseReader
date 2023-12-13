@@ -1,5 +1,6 @@
 from flet import *
 from scr.config_manager import ConfigManager
+from ui.main_window import MainWindow
 
 
 class AppBarUI(UserControl):

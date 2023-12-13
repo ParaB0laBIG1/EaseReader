@@ -13,6 +13,7 @@ class MainWindow(UserControl):
                 run_spacing=10,
                 alignment=MainAxisAlignment.CENTER,
                 width=page.window_width,
+                controls=[]
             )
 
         self.main_conatiner = Container(
