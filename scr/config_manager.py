@@ -1,19 +1,21 @@
 import json
 import os
 from flet import Page, FilePickerResultEvent
+from scr.book_manager import BookManager
 from ui.main_window import MainWindow
-from scr.book_manager import draw_book
+from ui.book_ui import BookUI
 
 
 class ConfigManager():
-    def __init__(self, page: Page):
+    def __init__(self, page: Page, book_m: BookManager, main_window: MainWindow, book_ui: BookUI):
         super().__init__()
 
-        
         self.page = page
         self.config_path = "config.json"
         self.config_data = self.load_config_data()  
-
+        self.book_m = book_m
+        self.main_window = main_window
+        self.book_ui = book_ui
 
         self.data = {
             "path_to_text_file": [],
@@ -47,7 +49,6 @@ class ConfigManager():
         with open(self.config_path, "w") as f:
             json.dump(self.data, f, indent=4)
 
-
         print("Create json file")
     
     def get_config_data(self, key: str):
@@ -69,24 +70,24 @@ class ConfigManager():
         
     def save_path_in_config(self, e: FilePickerResultEvent):
         """
-            Save the path to the file in a json file
+        Save the path to the file in a json file
         """
 
-        config_data = self.get_config_data(key="path_to_text_file")
+        config_data_path = self.get_config_data(key="path_to_text_file")
         new_paths = [f.path for f in e.files]
-        
+
         for path in new_paths:
             if self.checking_path_availability(path):
                 print(f"The selected file '{path}' is already written to Json")
             else:
-                config_data.append(path)
+                config_data_path.append(path)
 
-                # Update the config_data dictionary with the new paths
-                self.config_data["path_to_text_file"] = config_data
+        # Добавим сохранение текущей темы
+        self.config_data["path_to_text_file"] = config_data_path
+        self.config_data["theme"] = self.get_config_data(key="theme")
 
-                with open(self.config_path, "w", encoding="utf-8") as f:
-                    json.dump(self.config_data, f, indent=4, ensure_ascii=False)
-                    
-                    main_window_instance = MainWindow(page=self.page)
-                    draw_book(main_window=main_window_instance)
-                    print("Paths added to config")
+        with open(self.config_path, "w", encoding="utf-8") as f:
+            json.dump(self.config_data, f, indent=4, ensure_ascii=False)
+
+        self.book_m.draw_book(self.main_window, book_ui=self.book_ui)
+        print("Paths added to config")

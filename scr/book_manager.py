@@ -1,35 +1,40 @@
-from flet import Page
+from flet import *
 from ui.main_window import MainWindow
 from ui.book_ui import BookUI
 import json
 
-book_ui = BookUI(page=Page)
 
-def get_book_path():
-    try:
-        with open("config.json", "r", encoding="utf-8") as f:
-            data = json.load(f)
-            return data.get("path_to_text_file", [])
+class BookManager(UserControl):
+    def __init__(self, page: Page, book_ui: BookUI):
+        super().__init__()
+
+        self.page = page
+        self.book_ui = book_ui
+
+    def get_book_path(self):
+        try:
+            with open("config.json", "r", encoding="utf-8") as f:
+                data = json.load(f)
+                return data.get("path_to_text_file", [])
+            
+        except FileNotFoundError:
+            return {}
+        except json.JSONDecodeError as e:
+            print(f"Error decoding JSON: {e}")
+            return {}
+
+    def draw_book(self,main_window: MainWindow, book_ui):
+        items = []
+
+        entries = self.get_book_path()
+
+        main_window.book_row.controls.clear()
+        print("Books clear") 
+
+        for i in entries:
+            main_window.book_row.controls.append(
+                self.book_ui
+            )
         
-    except FileNotFoundError:
-        return {}
-    except json.JSONDecodeError as e:
-        print(f"Error decoding JSON: {e}")
-        return {}
-
-def draw_book(main_window: MainWindow(page=Page)):
-    items = []
-
-    entries = get_book_path()
-    main_w = main_window
-
-    # main_w.book_row.controls.clear()
-    # print("Books clear")
-
-    for i in entries:
-        main_w.book_row.controls.append(
-            book_ui.book_ui
-        )
-    
-    main_w.book_row.update()
-    print("drawing books to window")
+        main_window.book_row.update()
+        print("drawing books to window")
