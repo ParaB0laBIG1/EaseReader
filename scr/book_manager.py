@@ -15,6 +15,7 @@ class BookManager(UserControl):
         try:
             with open("config.json", "r", encoding="utf-8") as f:
                 data = json.load(f)
+                print(data.get("path_to_text_file", []))
                 return data.get("path_to_text_file", [])
             
         except FileNotFoundError:
@@ -23,12 +24,12 @@ class BookManager(UserControl):
             print(f"Error decoding JSON: {e}")
             return {}
 
-    def draw_book(self,main_window: MainWindow, book_ui):
-        items = []
+    def draw_book(self,main_window: MainWindow):
 
         entries = self.get_book_path()
 
         main_window.book_row.controls.clear()
+        main_window.book_row.update()
         print("Books clear") 
 
         for i in entries:

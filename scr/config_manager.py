@@ -18,8 +18,7 @@ class ConfigManager():
         self.book_ui = book_ui
 
         self.data = {
-            "path_to_text_file": [],
-            "theme": "Dark"
+            "path_to_text_file": []
         }
 
     def load_config_data(self):
@@ -57,7 +56,6 @@ class ConfigManager():
         """
 
         get_data = self.config_data.get(key, [])
-        print(get_data)
         return get_data
 
     def checking_path_availability(self, path):
@@ -73,21 +71,22 @@ class ConfigManager():
         Save the path to the file in a json file
         """
 
-        config_data_path = self.get_config_data(key="path_to_text_file")
+        config_data_path = set(self.get_config_data(key="path_to_text_file"))
         new_paths = [f.path for f in e.files]
 
         for path in new_paths:
             if self.checking_path_availability(path):
                 print(f"The selected file '{path}' is already written to Json")
             else:
-                config_data_path.append(path)
+                config_data_path.add(path)
 
-        # Добавим сохранение текущей темы
-        self.config_data["path_to_text_file"] = config_data_path
-        self.config_data["theme"] = self.get_config_data(key="theme")
+        self.config_data["path_to_text_file"] = list(config_data_path)
 
-        with open(self.config_path, "w", encoding="utf-8") as f:
-            json.dump(self.config_data, f, indent=4, ensure_ascii=False)
+        try:
+            with open(self.config_path, "w", encoding="utf-8") as f:
+                json.dump(self.config_data, f, indent=4, ensure_ascii=False)
+        except Exception as e:
+            print(f"Error while writing to config file: {e}")
 
-        self.book_m.draw_book(self.main_window, book_ui=self.book_ui)
+        self.book_m.draw_book(self.main_window)
         print("Paths added to config")

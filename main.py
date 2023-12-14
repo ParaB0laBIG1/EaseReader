@@ -25,7 +25,7 @@ def main(page: Page):
     page.appbar = appbar.appbarui
     page.add(app.build())
 
-    book_manager.draw_book(app, global_bookUI.book_ui_container)
+    book_manager.draw_book(app)
 
     page.update()
 
