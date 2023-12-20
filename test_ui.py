@@ -1,51 +1,86 @@
 from flet import *
 
 
-def main(page: Page):
-    # window settings
 
-    page.window_width = 800
-    page.window_height = 600
-    page.window_center()
-    page.title = "EaseReader"
-    
-    def items(count):
-        items = []
-        for i in range(1, count + 1):
-            items.append(
-                Container(
-                    content=Text(value=str(i)),
-                    alignment=alignment.center,
-                    width=300,
-                    height=100,
-                    bgcolor=colors.AMBER,
-                    border_radius=border_radius.all(5),
-                )
+class BookLoader(UserControl):
+    def __init__(self, page: Page):
+        super().__init__()
+
+        self.favorites_button = IconButton(
+            icon=icons.STAR_BORDER, tooltip="Add to Favorites"
+        )
+        
+        self.put_book = IconButton(
+            icon=icons.ACCESS_TIME, tooltip="Read later"
+        )
+
+        self.read_the_book = IconButton(
+            icon=icons.CHECK_CIRCLE_OUTLINED, tooltip="The book is read"
+        )
+
+        self.delete_book = PopupMenuItem(
+                icon=icons.DELETE, text="Delete book"
             )
-        return items
-    
-    row = Row(
-        wrap=True,
-        spacing=10,
-        run_spacing=10,
-        controls=items(100),
-        width=page.window_width,
-    )
 
-    page.add(
-        Column(
-            [
-                Text(
-                    "Change the row width to see how child items wrap onto multiple rows:"
-                ),
+        self.edit_book = PopupMenuItem(
+            icon=icons.EDIT, text="Edit"
+        )
+
+        self.others_button = PopupMenuButton(
+            items=[
+                self.delete_book,
+                self.edit_book
             ]
-        ),
-        row,
-    )
+        )
 
-    page.update()
+        # self.book_loader_container = Container(
+                #     alignment=alignment.center,
+                #     width=350,height=200,
+                #     bgcolor=colors.BLUE_GREY_700,
+                #     border_radius=border_radius.all(5),
+                #     content=Row(
+                #         alignment=alignment.top_left,spacing=0,
+                #         controls=[
 
+                #             Container(
+                #                 width=110,height=200,
+                #             ),
+                            
+                #             Container(
+                #                 width=240,height=160,
+                #                 content=Column(spacing=3,
+                #                     controls=[
+                #                         Text(  # Name book
+                #                             value=self.fb_manager.get_name_book(file_path=file_path),
+                #                             weight="bold",
+                #                             size=20
+                #                         ),
+                                        
+                #                         Text( # Name author
+                #                             value=self.fb_manager.get_author_name(file_path=file_path),
+                #                             size=13,
+                #                             color="grey"
+                #                         ),
 
-if __name__ == '__main__':
+                #                         Container(
+                #                             width=230, height=120, alignment=alignment.bottom_left,
+                #                             content=Row(
+                #                                 controls=[
+                #                                     self.favorites_button,
+                #                                     self.put_book,
+                #                                     self.read_the_book,
+                #                                     self.others_button
+                #                                 ]
+                #                             )
+                #                         )
 
-    app(target=main)
+                #                     ]
+                #                 )
+                #             )
+                #         ]
+                #     )
+                # )
+            
+
+    def build(self):
+        return self.book_loader_container

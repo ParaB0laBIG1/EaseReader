@@ -1,15 +1,17 @@
 from flet import *
 from ui.main_window import MainWindow
-from ui.book_ui import BookUI
+from scr.fb2_manager import FB2Manager
+from ui.BookUI.BookLoader import BookLoader
 import json
 
 
 class BookManager(UserControl):
-    def __init__(self, page: Page, book_ui: BookUI):
+    def __init__(self, page: Page, fb_manager: FB2Manager, book_loader_ui: BookLoader):
         super().__init__()
 
         self.page = page
-        self.book_ui = book_ui
+        self.fb_manager = fb_manager
+        self.book_loader_ui = book_loader_ui
 
     def get_book_path(self):
         try:
@@ -19,23 +21,27 @@ class BookManager(UserControl):
                 return data.get("path_to_text_file", [])
             
         except FileNotFoundError:
-            return {}
+            return []
         except json.JSONDecodeError as e:
             print(f"Error decoding JSON: {e}")
-            return {}
+            return []
 
     def draw_book(self,main_window: MainWindow):
 
-        entries = self.get_book_path()
+        file_paths = self.get_book_path()
 
-        main_window.book_row.controls.clear()
-        main_window.book_row.update()
-        print("Books clear") 
+        for file_path in file_paths:
+            metadate = self.fb_manager.generate_metadata(file_path=file_path)
 
-        for i in entries:
+            title_book = self.book_loader_ui.title_book
+            book_loader_container = self.book_loader_ui.book_loader_container
+
+            title_book.value = metadate["title"]
+            print(title_book.value)
+
+            
             main_window.book_row.controls.append(
-                self.book_ui
+                book_loader_container
             )
-        
+
         main_window.book_row.update()
-        print("drawing books to window")

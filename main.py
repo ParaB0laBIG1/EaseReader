@@ -1,18 +1,20 @@
 from flet import *
 from ui.AppbarUi import AppBarUI
 from ui.main_window import MainWindow
-from ui.book_ui import BookUI
 from scr.book_manager import BookManager
 from scr.config_manager import ConfigManager
+from ui.BookUI.BookLoader import BookLoader
+from scr.fb2_manager import FB2Manager
 
 
 def main(page: Page):
     
     app = MainWindow(page=page)
-    global_bookUI = BookUI(page=page)
-    book_manager = BookManager(page, global_bookUI) 
-    appbar = AppBarUI(page=page, book_m=book_manager, main_window=app, book_ui=global_bookUI)
-    config = ConfigManager(page=Page, book_m=book_manager, main_window=app, book_ui=global_bookUI)
+    fb2_manager = FB2Manager(page=page)
+    book_loader_ui = BookLoader(page=page)
+    book_manager = BookManager(page, fb_manager=fb2_manager, book_loader_ui=book_loader_ui) 
+    appbar = AppBarUI(page=page, book_m=book_manager, main_window=app, book_loader_ui=book_loader_ui)
+    config = ConfigManager(page=Page, book_m=book_manager, main_window=app, book_loader_ui=book_loader_ui)
 
     config.check_config_file()
 
