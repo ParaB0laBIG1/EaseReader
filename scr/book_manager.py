@@ -10,7 +10,7 @@ class BookManager(UserControl):
         super().__init__()
 
         self.page = page
-        self.fb_manager = fb_manager
+        self.fb2_manager = fb_manager
         self.book_loader_ui = book_loader_ui
 
     def get_book_path(self):
@@ -26,22 +26,20 @@ class BookManager(UserControl):
             print(f"Error decoding JSON: {e}")
             return []
 
-    def draw_book(self,main_window: MainWindow):
-
+    def draw_book(self, main_window: MainWindow):
         file_paths = self.get_book_path()
+        
+        main_window.book_row.controls.clear()
+        for filename in file_paths:
+            metadata = self.fb2_manager.generate_metadata(filename=filename)
 
-        for file_path in file_paths:
-            metadate = self.fb_manager.generate_metadata(file_path=file_path)
+            # Создаем новый экземпляр BookLoader для каждой книги
+            book_loader = BookLoader(self.page)
+            book_loader.title_book.value = metadata["title"]
+            book_loader.author_name.value = metadata["author"]
+            book_loader.cover_book_image.src = f"https://picsum.photos/200/200?"
+            book_loader.cover_book_image.src = metadata["cover"]
 
-            title_book = self.book_loader_ui.title_book
-            book_loader_container = self.book_loader_ui.book_loader_container
-
-            title_book.value = metadate["title"]
-            print(title_book.value)
-
+            main_window.book_row.controls.append(book_loader.build())
             
-            main_window.book_row.controls.append(
-                book_loader_container
-            )
-
         main_window.book_row.update()

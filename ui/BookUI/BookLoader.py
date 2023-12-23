@@ -9,13 +9,18 @@ class BookLoader(UserControl):
                 weight="bold",size=20
         )
 
-
         self.author_name = Text(
             size=13,color="grey"
         )
 
+        self.cover_book_image = Image(
+                width=110,height=200,
+                fit=ImageFit.NONE,
+                repeat=ImageRepeat.NO_REPEAT,
+            )
         self.cover_book = Container(
             width=110,height=200,
+            content=self.cover_book_image
         )
 
         self.favorites_button = IconButton(

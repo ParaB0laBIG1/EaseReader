@@ -1,30 +1,49 @@
 from flet import *
 from bs4 import BeautifulSoup
-import os
+from PIL import Image
+import base64
+from io import BytesIO
 
 
 class FB2Manager:
     def __init__(self, page: Page):
         super().__init__()
         self.page = page
-        
+
+        self.metadata = {
+            "title": None,
+            "author": None,
+            "cover": None
+        }
+
+    def generate_metadata(self, filename):
+        with open(filename, "r", encoding="utf-8") as file:
+            soup = BeautifulSoup(file, "xml")
+
+        author_tag = soup.find("author") or soup.find("title-info")
+        author_name = author_tag.find("first-name").text + ' ' + author_tag.find("last-name").text
+
+        title_tag = soup.find("title-info").find("book-title")
+        book_title = title_tag.text
+
+        self.metadata["title"] = book_title
+        self.metadata["author"] = author_name
+        self.metadata["cover"] = self.get_cover_book(filename=filename)
+        print(self.metadata["cover"])
+        return self.metadata
     
-    def generate_metadata(self,file_path):
-
-        metadata = {"title":None, "author":None}
-
-        with open(file_path, 'r', encoding='utf-8') as file:
+    def get_cover_book(self, filename):
+        with open(filename, 'r', encoding='utf-8') as file:
             soup = BeautifulSoup(file, 'xml')
 
-        all_tags = soup.find("description")
-        title = all_tags.find("book-title").text
-        if title == '' or title is None:
-            title = os.path.splitext(
-                os.path.basename(file_path))[0]
+        # Найти обложку в XML-структуре fb2
+        cover_data = None
+        for binary_tag in soup.find_all('binary', {'content-type': 'image/jpeg'}):
+            cover_data = binary_tag.text
 
-        author_tag = soup.find('author')
-        author = f"{author_tag.find('first-name').text.strip()} {author_tag.find('last-name').text.strip()}"
+            if cover_data:
+                # Декодировать base64 и создать изображение из байтов
+                image_data = base64.b64decode(cover_data)
+                image = Image.open(BytesIO(image_data))
 
-        metadata['title'] = title
-        metadata['author'] = author
-        return metadata
+                return image
